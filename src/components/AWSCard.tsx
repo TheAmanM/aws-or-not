@@ -1,5 +1,3 @@
-import KeyboardKey from "./KeyboardKey";
-
 export default function AWSCard({
   title,
   description,
