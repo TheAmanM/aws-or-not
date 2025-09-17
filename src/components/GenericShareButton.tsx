@@ -5,7 +5,6 @@ import html2canvas from "html2canvas";
 import ShareModal from "./ShareModal";
 
 interface GenericShareButtonProps {
-  // We no longer need url and title, so we only keep the ref
   targetRef: React.RefObject<HTMLElement | null>;
 }
 
@@ -13,10 +12,10 @@ export default function GenericShareButton({
   targetRef,
 }: GenericShareButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // 👇 Define your static share content here
+
   const shareText = "How well do you know AWS? https://aws.amanmeherally.com";
   const shareUrl = "https://aws.amanmeherally.com";
-  const shareTitle = "How well do you know AWS?"; // A title for the share sheet
+  const shareTitle = "How well do you know AWS?";
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -48,11 +47,9 @@ export default function GenericShareButton({
         navigator.canShare({ files: [imageFile] })
       ) {
         try {
-          // 👇 Use the new static values
           await navigator.share({
             title: shareTitle,
-            text: shareText, // Use the 'text' property for the main message
-            url: shareUrl,
+            text: shareText,
             files: [imageFile],
           });
           console.log("Shared successfully with image!");
@@ -65,11 +62,9 @@ export default function GenericShareButton({
       }
 
       try {
-        // 👇 Use the new static values for the fallback as well
         await navigator.share({
           title: shareTitle,
           text: shareText,
-          url: shareUrl,
         });
         console.log("Shared successfully without image!");
       } catch (error) {
@@ -90,7 +85,6 @@ export default function GenericShareButton({
         onClick={handleShare}
         className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2"
       >
-        {/* SVG Icon */}
         <span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
