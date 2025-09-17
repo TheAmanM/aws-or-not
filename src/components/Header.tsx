@@ -5,7 +5,7 @@ export default function Header() {
     <header className="border-b border-[#ccccd1]">
       <nav className="flex flex-row items-center justify-center py-2 gap-2">
         <Logo className="size-10 lg:size-12" />
-        <h1 className="text-2xl lg:text-3xl font-medium">or Not</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">or Not</h1>
       </nav>
     </header>
   );

@@ -1,19 +1,37 @@
 export default function AWSCard({
   title,
   description,
+  isReal,
+  isSelected,
+  isRevealed,
+  onClick,
 }: {
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
+  isReal: boolean;
+  isSelected: boolean;
+  isRevealed: boolean;
+  onClick: () => void;
 }) {
+  const getBorderClass = () => {
+    if (isRevealed && isSelected) {
+      return isReal ? "border-green-500" : "border-red-500";
+    }
+    return "border-transparent hover:border-black";
+  };
+
   return (
-    <div className="bg-[#f3f3f7] p-6 rounded-2xl h-70 w-[calc(100svw-2rem)] max-w-110 border-[#f3f3f7] border-2 hover:border-black cursor-pointer font-aws flex flex-col">
-      <h2 className="mb-2 text-lg">{title ?? ""}</h2>
-      <p className="font-light">{description ?? ""}</p>
+    <div
+      onClick={onClick}
+      className={`bg-[#f3f3f7] p-6 rounded-2xl h-70 w-[calc(100svw-2rem)] max-w-110 border-2 cursor-pointer font-aws flex flex-col transition-colors duration-300 ${getBorderClass()}`}
+    >
+      <h2 className="mb-2 text-lg font-bold">{title ?? ""}</h2>
+      <p>{description ?? ""}</p>
       <div className="mt-auto flex items-center gap-2">
-        <span>Learn more</span>
+        <span className="font-bold">Learn more</span>
         <span>
           <svg
-            xmlns="http://www.w3.org/2000/svg"
+            xmlns="http://www.w.org/2000/svg"
             viewBox="0 0 16 16"
             className="size-4"
           >
