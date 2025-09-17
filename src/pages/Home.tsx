@@ -1,19 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
-import AWSCard from "./components/AWSCard";
-import Footer from "./components/Footer";
-import arrowRight from "./assets/icons/arrow-right.svg";
-import type { Service, Selection } from "./types/Service";
-import KeyboardKey from "./components/KeyboardKey";
-import { useGeneratePair } from "./hooks/useGeneratePair";
-import { usePosthog } from "./hooks/usePosthog";
+import AWSCard from "../components/AWSCard";
+import Footer from "../components/Footer";
+import arrowRight from "../assets/icons/arrow-right.svg";
+import type { Service, Selection } from "../types/Service";
+import KeyboardKey from "../components/KeyboardKey";
+import { useGeneratePair } from "../hooks/useGeneratePair";
+import { usePosthog } from "../hooks/usePosthog";
+import Teaser from "../components/Teaser";
+import ViewResults from "../components/ViewResults";
+import { useSaveData } from "../hooks/useSaveData";
 
-function App() {
+function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [selection, setSelection] = useState<Selection>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const { getPair } = useGeneratePair();
   const { captureAttempt } = usePosthog();
   const [startTime, setStartTime] = useState(Date.now());
+  const { saveResult } = useSaveData();
 
   useEffect(() => {
     setServices(getPair());
@@ -41,6 +45,8 @@ function App() {
           question_pair_id: `${realService.title}-${fakeService.title}`,
         });
       }
+
+      saveResult(selectedService.isReal);
 
       setSelection({ index: clickedIndex });
 
@@ -78,11 +84,7 @@ function App() {
 
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
-      <section className="mt-6 px-4">
-        <h2 className="text-xl lg:text-3xl text-center font-normal">
-          Which one is the real AWS service?
-        </h2>
-      </section>
+      <Teaser />
       <section
         className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-250 ease-in-out
           ${
@@ -146,9 +148,12 @@ function App() {
           </>
         )}
       </section>
+      <section className="w-full mb-4">
+        <ViewResults />
+      </section>
       <Footer />
     </main>
   );
 }
 
-export default App;
+export default Home;
