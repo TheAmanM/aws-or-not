@@ -13,7 +13,7 @@ export default function GenericShareButton({
 }: GenericShareButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const shareText = "How well do you know AWS? https://aws.amanmeherally.com";
+  // const shareText = "How well do you know AWS? https://aws.amanmeherally.com";
   const shareUrl = "https://aws.amanmeherally.com";
   const shareTitle = "How well do you know AWS?";
 
