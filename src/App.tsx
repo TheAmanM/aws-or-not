@@ -7,50 +7,16 @@ import arrowRight from "./assets/icons/arrow-right.svg";
 
 import type { Service, Selection } from "./types/Service";
 import KeyboardKey from "./components/KeyboardKey";
-
-// Mock getServices function remains the same...
-const getServices = () => {
-  const allServices = [
-    {
-      title: "Amazon Aurora",
-      description:
-        "MySQL and PostgreSQL-compatible relational database built for the cloud.",
-      isReal: true,
-    },
-    {
-      title: "Amazon Elastic Compute Cloud (EC2)",
-      description: "Provides secure, resizable compute capacity in the cloud.",
-      isReal: true,
-    },
-    {
-      title: "Amazon CloudTrail Mix",
-      description:
-        "A fictional service that combines logging with a DJ-style audio mixer for your cloud events.",
-      isReal: false,
-    },
-    {
-      title: "AWS Graviton Buzz",
-      description:
-        "A fake service that promises to increase processor performance by generating a low-frequency hum.",
-      isReal: false,
-    },
-  ] as Service[];
-  const real = allServices.filter((s) => s.isReal);
-  const fake = allServices.filter((s) => !s.isReal);
-  const pair = [
-    real[Math.floor(Math.random() * real.length)],
-    fake[Math.floor(Math.random() * fake.length)],
-  ];
-  return pair.sort(() => Math.random() - 0.5);
-};
+import { useGeneratePair } from "./hooks/useGeneratePair";
 
 function App() {
   const [services, setServices] = useState<Service[]>([]);
   const [selection, setSelection] = useState<Selection>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const { getPair } = useGeneratePair();
 
   useEffect(() => {
-    setServices(getServices());
+    setServices(getPair());
   }, []);
 
   // Wrapped handleCardClick in useCallback for performance
@@ -65,18 +31,18 @@ function App() {
       // 2. Hide the overlay after a delay
       setTimeout(() => {
         setSelection(null);
-      }, 800);
+      }, 450);
 
       // 3. Start the slide animation
       setTimeout(() => {
         setIsAnimating(true);
-      }, 750);
+      }, 400);
 
       // 4. Load new content after the animation
       setTimeout(() => {
-        setServices(getServices());
+        setServices(getPair());
         setIsAnimating(false);
-      }, 1500);
+      }, 800);
     },
     [isAnimating, selection]
   ); // Dependencies for useCallback
@@ -110,7 +76,7 @@ function App() {
         </h2>
       </section>
       <section
-        className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-500 ease-in-out
+        className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-250 ease-in-out
           ${
             isAnimating
               ? "opacity-0 -translate-y-8"
