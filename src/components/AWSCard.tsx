@@ -1,3 +1,5 @@
+import KeyboardKey from "./KeyboardKey";
+
 export default function AWSCard({
   title,
   description,
@@ -6,6 +8,7 @@ export default function AWSCard({
   isRevealed,
   isAnimating, // <-- ADD isAnimating to props
   onClick,
+  keyboardShortcut,
 }: {
   title: string;
   description: string;
@@ -14,6 +17,7 @@ export default function AWSCard({
   isRevealed: boolean;
   isAnimating: boolean; // <-- ADD isAnimating to type definition
   onClick: () => void;
+  keyboardShortcut?: React.ReactNode;
 }) {
   const showOverlay = isRevealed && isSelected;
 
@@ -44,6 +48,7 @@ export default function AWSCard({
               <path d="M1 7.00001H11.91L8.32 3.74001L9.67 2.26001L15.17 7.26001C15.38 7.45001 15.5 7.72001 15.5 8.00001C15.5 8.28001 15.38 8.55001 15.17 8.74001L9.67 13.74L8.32 12.26L11.91 9.00001H1V7.00001Z" />
             </svg>
           </span>
+          {keyboardShortcut}
         </div>
       </div>
 

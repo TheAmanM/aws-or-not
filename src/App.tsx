@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AWSCard from "./components/AWSCard";
 import Footer from "./components/Footer";
-import Header from "./components/Header";
+// import Header from "./components/Header";
+
+import arrowRight from "./assets/icons/arrow-right.svg";
 
 import type { Service, Selection } from "./types/Service";
+import KeyboardKey from "./components/KeyboardKey";
 
 // Mock getServices function remains the same...
 const getServices = () => {
@@ -50,46 +53,69 @@ function App() {
     setServices(getServices());
   }, []);
 
-  // -- NEW ANIMATION LOGIC --
-  const handleCardClick = (clickedIndex: number) => {
-    // Prevent clicks during the sequence
-    if (isAnimating || selection) return;
+  // Wrapped handleCardClick in useCallback for performance
+  const handleCardClick = useCallback(
+    (clickedIndex: number) => {
+      // Prevent clicks/keypresses during the sequence
+      if (isAnimating || selection) return;
 
-    // 1. Show the result overlay
-    setSelection({ index: clickedIndex });
+      // 1. Show the result overlay
+      setSelection({ index: clickedIndex });
 
-    // 2. After 1.2s, hide the overlay. The overlay's fade-out takes 300ms.
-    setTimeout(() => {
-      setSelection(null);
-    }, 800);
+      // 2. Hide the overlay after a delay
+      setTimeout(() => {
+        setSelection(null);
+      }, 800);
 
-    // 3. After the overlay is gone (1200ms + 300ms), start the slide animation.
-    setTimeout(() => {
-      setIsAnimating(true);
-    }, 750);
+      // 3. Start the slide animation
+      setTimeout(() => {
+        setIsAnimating(true);
+      }, 750);
 
-    // 4. After the slide animation is done (1500ms + 300ms), load new content.
-    setTimeout(() => {
-      setServices(getServices());
-      setIsAnimating(false);
-    }, 1500);
-  };
+      // 4. Load new content after the animation
+      setTimeout(() => {
+        setServices(getServices());
+        setIsAnimating(false);
+      }, 1500);
+    },
+    [isAnimating, selection]
+  ); // Dependencies for useCallback
+
+  // -- NEW: useEffect for Keyboard Controls --
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Use e.key to check which key was pressed
+      if (e.key === "ArrowLeft" || e.key === "a") {
+        handleCardClick(0); // Trigger left card
+      } else if (e.key === "ArrowRight" || e.key === "d") {
+        handleCardClick(1); // Trigger right card
+      }
+    };
+
+    // Add event listener when the component mounts
+    window.addEventListener("keydown", handleKeyPress);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleCardClick]); // Re-run effect if handleCardClick changes
 
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
-      <Header />
+      {/* <Header /> */}
       <section className="mt-8 px-4">
         <h2 className="text-2xl lg:text-3xl text-center font-normal">
           Which one is the real AWS service?
         </h2>
       </section>
       <section
-        // The slide animation is now faster (duration-300)
         className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-500 ease-in-out
           ${
             isAnimating
               ? "opacity-0 -translate-y-8"
-              : "opacity-100 translate-y-0"
+              : // The translate-y-0 was missing, this fixes a small visual bug
+                "opacity-100 translate-y-0"
           }
         `}
       >
@@ -103,8 +129,23 @@ function App() {
               isRevealed={selection !== null}
               isAnimating={isAnimating}
               onClick={() => handleCardClick(0)}
+              keyboardShortcut={
+                <div className="flex items-center gap-2 ml-auto">
+                  <KeyboardKey>
+                    <img
+                      src={arrowRight}
+                      alt="Press A or Left Arrow"
+                      className="size-4 rotate-180"
+                    />
+                  </KeyboardKey>
+                  <p className="text-xs text-[#0006]">/</p>
+                  <KeyboardKey>
+                    <h2 className="text-sm">A</h2>
+                  </KeyboardKey>
+                </div>
+              }
             />
-            <p className="text-[#888]">or</p>
+            <p className="text-[#888] lg:text-lg">or</p>
             <AWSCard
               title={services[1].title}
               description={services[1].description}
@@ -113,6 +154,21 @@ function App() {
               isRevealed={selection !== null}
               isAnimating={isAnimating}
               onClick={() => handleCardClick(1)}
+              keyboardShortcut={
+                <div className="flex items-center gap-2 ml-auto">
+                  <KeyboardKey>
+                    <img
+                      src={arrowRight}
+                      alt="Press A or Left Arrow"
+                      className="size-4"
+                    />
+                  </KeyboardKey>
+                  <p className="text-xs text-[#0006]">/</p>
+                  <KeyboardKey>
+                    <h2 className="text-sm">D</h2>
+                  </KeyboardKey>
+                </div>
+              }
             />
           </>
         )}
