@@ -1,6 +1,6 @@
 export default function ViewResults() {
   return (
-    <a href="/results">
+    <a href="#results">
       <button className="bg-[#f3f3f7] py-2.5 px-3 rounded-lg flex items-center gap-2 cursor-pointer mx-auto">
         <h2 className="font-bold">View Results</h2>
         <svg

@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Home from "./pages/Home.tsx";
 import { PostHogProvider } from "posthog-js/react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { HashRouter, Route, Routes } from "react-router";
 
 import "./globals.css";
 import type { PostHogConfig } from "posthog-js";
@@ -21,12 +21,12 @@ createRoot(document.getElementById("root")!).render(
       apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
       options={options}
     >
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/results" element={<Results />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </PostHogProvider>
   </StrictMode>
 );

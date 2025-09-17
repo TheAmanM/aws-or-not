@@ -109,7 +109,7 @@ export default function Results() {
         </section>
 
         <section className="flex items-center justify-end w-full max-w-xl lg:max-w-3xl gap-4">
-          <a href="/">
+          <a href="#">
             <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer">
               <span>
                 <svg
