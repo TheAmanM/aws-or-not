@@ -10,7 +10,6 @@ import {
 } from "../components/Chart";
 import Teaser from "../components/Teaser";
 import { useSaveData } from "../hooks/useSaveData";
-import ShareButton from "../components/ShareButton"; // 👈 Import the new component
 import GenericShareButton from "../components/GenericShareButton";
 
 const chartConfig = {
