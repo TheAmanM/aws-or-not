@@ -104,7 +104,7 @@ function App() {
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
       {/* <Header /> */}
-      <section className="mt-8 px-4">
+      <section className="mt-6 px-4">
         <h2 className="text-2xl lg:text-3xl text-center font-normal">
           Which one is the real AWS service?
         </h2>

@@ -23,7 +23,7 @@ export default function AWSCard({
     <div
       onClick={onClick}
       // UPDATED LINE: The hover effect is now disabled during animations
-      className={`relative bg-[#f3f3f7] p-6 rounded-2xl h-70 w-[calc(100svw-2rem)] max-w-110 border-2 border-transparent cursor-pointer font-aws flex flex-col transition-colors duration-300 ${
+      className={`relative bg-[#f3f3f7] p-6 rounded-2xl h-60 lg:h-70 w-[calc(100svw-2rem)] max-w-110 border-2 border-transparent cursor-pointer font-aws flex flex-col transition-colors duration-300 ${
         !isRevealed && !isAnimating && "hover:border-black"
       }`}
     >
