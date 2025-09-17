@@ -136,11 +136,7 @@ export default function Results() {
             shareText={`I have a streak of ${currentStreak}! Check out my progress. You can play too: ${window.location.origin}`}
             shareUrl={window.location.origin}
           /> */}
-          <GenericShareButton
-            targetRef={graphSectionRef}
-            url={window.location.href}
-            title={`I have a streak of ${currentStreak}! Check out my progress.`}
-          />
+          <GenericShareButton targetRef={graphSectionRef} />
         </section>
       </section>
     </main>

@@ -5,25 +5,24 @@ import html2canvas from "html2canvas";
 import ShareModal from "./ShareModal";
 
 interface GenericShareButtonProps {
-  url: string;
-  title: string;
-  targetRef: React.RefObject<HTMLElement | null>; // Re-add the ref prop
+  // We no longer need url and title, so we only keep the ref
+  targetRef: React.RefObject<HTMLElement | null>;
 }
 
 export default function GenericShareButton({
-  url,
-  title,
   targetRef,
 }: GenericShareButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // 👇 Define your static share content here
+  const shareText = "How well do you know AWS? https://aws.amanmeherally.com";
+  const shareUrl = "https://aws.amanmeherally.com";
+  const shareTitle = "How well do you know AWS?"; // A title for the share sheet
 
   const handleShare = async () => {
-    // Check if the native Web Share API is available at all
     if (navigator.share) {
       const element = targetRef.current;
       let imageFile: File | null = null;
 
-      // 1. Try to generate a screenshot if the element exists
       if (element) {
         try {
           const canvas = await html2canvas(element, {
@@ -43,20 +42,21 @@ export default function GenericShareButton({
         }
       }
 
-      // 2. Attempt to share WITH the image file (Best case)
       if (
         imageFile &&
         navigator.canShare &&
         navigator.canShare({ files: [imageFile] })
       ) {
         try {
+          // 👇 Use the new static values
           await navigator.share({
-            title: title,
-            url: url,
+            title: shareTitle,
+            text: shareText, // Use the 'text' property for the main message
+            url: shareUrl,
             files: [imageFile],
           });
           console.log("Shared successfully with image!");
-          return; // Exit after success
+          return;
         } catch (error) {
           if ((error as DOMException).name === "AbortError")
             return console.log("Share cancelled.");
@@ -64,11 +64,12 @@ export default function GenericShareButton({
         }
       }
 
-      // 3. Fallback: Share text and URL only (if image failed or wasn't supported)
       try {
+        // 👇 Use the new static values for the fallback as well
         await navigator.share({
-          title: title,
-          url: url,
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
         });
         console.log("Shared successfully without image!");
       } catch (error) {
@@ -79,7 +80,6 @@ export default function GenericShareButton({
         }
       }
     } else {
-      // 4. Final Fallback: Open the custom modal for desktop browsers
       setIsModalOpen(true);
     }
   };
@@ -115,8 +115,8 @@ export default function GenericShareButton({
 
       {isModalOpen && (
         <ShareModal
-          url={url}
-          title={title}
+          url={shareUrl}
+          title={shareTitle}
           onClose={() => setIsModalOpen(false)}
         />
       )}
