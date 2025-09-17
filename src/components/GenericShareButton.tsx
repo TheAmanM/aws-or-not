@@ -49,7 +49,7 @@ export default function GenericShareButton({
         try {
           await navigator.share({
             title: shareTitle,
-            text: shareText,
+            url: shareText,
             files: [imageFile],
           });
           console.log("Shared successfully with image!");
@@ -63,8 +63,7 @@ export default function GenericShareButton({
 
       try {
         await navigator.share({
-          title: shareTitle,
-          text: shareText,
+          url: shareText,
         });
         console.log("Shared successfully without image!");
       } catch (error) {
