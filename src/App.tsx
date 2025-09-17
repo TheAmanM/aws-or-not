@@ -5,6 +5,7 @@ import Header from "./components/Header";
 
 import type { Service, Selection } from "./types/Service";
 
+// Mock getServices function remains the same...
 const getServices = () => {
   const allServices = [
     {
@@ -49,17 +50,29 @@ function App() {
     setServices(getServices());
   }, []);
 
+  // -- NEW ANIMATION LOGIC --
   const handleCardClick = (clickedIndex: number) => {
+    // Prevent clicks during the sequence
     if (isAnimating || selection) return;
+
+    // 1. Show the result overlay
     setSelection({ index: clickedIndex });
+
+    // 2. After 1.2s, hide the overlay. The overlay's fade-out takes 300ms.
+    setTimeout(() => {
+      setSelection(null);
+    }, 800);
+
+    // 3. After the overlay is gone (1200ms + 300ms), start the slide animation.
     setTimeout(() => {
       setIsAnimating(true);
-    }, 1200);
+    }, 750);
+
+    // 4. After the slide animation is done (1500ms + 300ms), load new content.
     setTimeout(() => {
       setServices(getServices());
-      setSelection(null);
       setIsAnimating(false);
-    }, 1700);
+    }, 1500);
   };
 
   return (
@@ -71,6 +84,7 @@ function App() {
         </h2>
       </section>
       <section
+        // The slide animation is now faster (duration-300)
         className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-500 ease-in-out
           ${
             isAnimating
@@ -87,6 +101,7 @@ function App() {
               isReal={services[0].isReal}
               isSelected={selection?.index === 0}
               isRevealed={selection !== null}
+              isAnimating={isAnimating}
               onClick={() => handleCardClick(0)}
             />
             <p className="text-[#888]">or</p>
@@ -96,6 +111,7 @@ function App() {
               isReal={services[1].isReal}
               isSelected={selection?.index === 1}
               isRevealed={selection !== null}
+              isAnimating={isAnimating}
               onClick={() => handleCardClick(1)}
             />
           </>
