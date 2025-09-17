@@ -1,3 +1,6 @@
+// src/pages/Results.tsx (or wherever this component lives)
+
+import { useRef } from "react"; // 👈 Import useRef
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
   ChartContainer,
@@ -7,6 +10,8 @@ import {
 } from "../components/Chart";
 import Teaser from "../components/Teaser";
 import { useSaveData } from "../hooks/useSaveData";
+import ShareButton from "../components/ShareButton"; // 👈 Import the new component
+import GenericShareButton from "../components/GenericShareButton";
 
 const chartConfig = {
   desktop: {
@@ -18,8 +23,13 @@ const chartConfig = {
 export default function Results() {
   const { getData, getStreak } = useSaveData();
   const chartData = getData();
+  const currentStreak = getStreak();
+
+  // Create a ref for the graph section
+  const graphSectionRef = useRef<HTMLElement>(null);
 
   const renderChart = (data: typeof chartData): React.ReactNode => {
+    // ... (Your existing renderChart function remains unchanged)
     if (data === null) {
       return <p>Sorry, an error occured!</p>;
     } else if ("itemsLeft" in data) {
@@ -85,13 +95,19 @@ export default function Results() {
           </div>
           <div className="ml-auto flex flex-col items-center justify-center">
             <span className="text-4xl lg:text-5xl font-bold mx-4">
-              {getStreak()}
+              {currentStreak}
             </span>
           </div>
         </section>
-        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl pt-8 pb-4 px-5 rounded-xl flex items-center">
+
+        {/* 👇 Attach the ref to the section you want to capture */}
+        <section
+          ref={graphSectionRef}
+          className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl pt-8 pb-4 px-5 rounded-xl flex items-center"
+        >
           {renderChart(chartData)}
         </section>
+
         <section className="flex items-center justify-end w-full max-w-xl lg:max-w-3xl gap-4">
           <a href="/">
             <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer">
@@ -103,9 +119,9 @@ export default function Results() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-arrow-left-icon lucide-arrow-left size-5"
                 >
                   <path d="m12 19-7-7 7-7" />
@@ -114,28 +130,18 @@ export default function Results() {
               </span>
             </button>
           </a>
-          <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2">
-            <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-share2-icon lucide-share-2 size-5"
-              >
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-                <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-              </svg>
-            </span>
-          </button>
+
+          {/* 👇 Replace the old button with the new ShareButton component */}
+          {/* <ShareButton
+            targetRef={graphSectionRef}
+            shareText={`I have a streak of ${currentStreak}! Check out my progress. You can play too: ${window.location.origin}`}
+            shareUrl={window.location.origin}
+          /> */}
+          <GenericShareButton
+            targetRef={graphSectionRef}
+            url={window.location.href}
+            title={`I have a streak of ${currentStreak}! Check out my progress.`}
+          />
         </section>
       </section>
     </main>
