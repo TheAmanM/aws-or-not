@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="flex items-center justify-center gap-2.5 py-2 text-[#888]">
+    <footer className="flex items-center justify-center gap-2.5 py-2 lg:py-3 text-[#888] lg:text-xl">
       <a href="https://amanmeherally.com" target="_blank">
         portfolio
       </a>
