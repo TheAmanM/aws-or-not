@@ -1,75 +1,83 @@
 import { useState, useEffect, useCallback } from "react";
 import AWSCard from "./components/AWSCard";
 import Footer from "./components/Footer";
-// import Header from "./components/Header";
-
 import arrowRight from "./assets/icons/arrow-right.svg";
-
 import type { Service, Selection } from "./types/Service";
 import KeyboardKey from "./components/KeyboardKey";
 import { useGeneratePair } from "./hooks/useGeneratePair";
+import { usePosthog } from "./hooks/usePosthog";
 
 function App() {
   const [services, setServices] = useState<Service[]>([]);
   const [selection, setSelection] = useState<Selection>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const { getPair } = useGeneratePair();
+  const { captureAttempt } = usePosthog();
+  const [startTime, setStartTime] = useState(Date.now());
 
   useEffect(() => {
     setServices(getPair());
   }, []);
 
-  // Wrapped handleCardClick in useCallback for performance
+  useEffect(() => {
+    setStartTime(Date.now());
+  }, [services]);
+
   const handleCardClick = useCallback(
     (clickedIndex: number) => {
-      // Prevent clicks/keypresses during the sequence
       if (isAnimating || selection) return;
 
-      // 1. Show the result overlay
+      const realService = services.find((s) => s.isReal);
+      const fakeService = services.find((s) => !s.isReal);
+      const selectedService = services[clickedIndex];
+
+      if (realService && fakeService) {
+        captureAttempt({
+          real_aws_service: realService.title,
+          fake_aws_service: fakeService.title,
+          selected_answer: selectedService.title,
+          is_correct: selectedService.isReal,
+          time_to_answer_ms: Date.now() - startTime,
+          question_pair_id: `${realService.title}-${fakeService.title}`,
+        });
+      }
+
       setSelection({ index: clickedIndex });
 
-      // 2. Hide the overlay after a delay
       setTimeout(() => {
         setSelection(null);
       }, 450);
 
-      // 3. Start the slide animation
       setTimeout(() => {
         setIsAnimating(true);
       }, 400);
 
-      // 4. Load new content after the animation
       setTimeout(() => {
         setServices(getPair());
         setIsAnimating(false);
       }, 800);
     },
-    [isAnimating, selection]
-  ); // Dependencies for useCallback
+    [isAnimating, selection, services, getPair, captureAttempt, startTime]
+  );
 
-  // -- NEW: useEffect for Keyboard Controls --
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Use e.key to check which key was pressed
       if (e.key === "ArrowLeft" || e.key === "a") {
-        handleCardClick(0); // Trigger left card
+        handleCardClick(0);
       } else if (e.key === "ArrowRight" || e.key === "d") {
-        handleCardClick(1); // Trigger right card
+        handleCardClick(1);
       }
     };
 
-    // Add event listener when the component mounts
     window.addEventListener("keydown", handleKeyPress);
 
-    // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [handleCardClick]); // Re-run effect if handleCardClick changes
+  }, [handleCardClick]);
 
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
-      {/* <Header /> */}
       <section className="mt-6 px-4">
         <h2 className="text-2xl lg:text-3xl text-center font-normal">
           Which one is the real AWS service?
@@ -80,8 +88,7 @@ function App() {
           ${
             isAnimating
               ? "opacity-0 -translate-y-8"
-              : // The translate-y-0 was missing, this fixes a small visual bug
-                "opacity-100 translate-y-0"
+              : "opacity-100 translate-y-0"
           }
         `}
       >
