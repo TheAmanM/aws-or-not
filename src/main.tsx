@@ -9,6 +9,8 @@ import type { PostHogConfig } from "posthog-js";
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: "2025-05-24",
+  cross_subdomain_cookie: false,
+  __preview_disable_beacon: true,
 };
 
 createRoot(document.getElementById("root")!).render(
