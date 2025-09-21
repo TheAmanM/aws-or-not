@@ -1,3 +1,25 @@
+/**
+ * Calculates a rolling average for a series of numbers.
+ * @param data An array of numbers.
+ * @param windowSize The number of data points to include in each average calculation.
+ * @returns An array containing the rolling average.
+ */
+function calculateRollingAverage(data: number[], windowSize: number): number[] {
+  if (windowSize <= 0) {
+    return data;
+  }
+
+  const rollingAverages: number[] = [];
+  for (let i = 0; i < data.length; i++) {
+    const start = Math.max(0, i - windowSize + 1);
+    const windowSlice = data.slice(start, i + 1);
+    const sum = windowSlice.reduce((acc, val) => acc + val, 0);
+    rollingAverages.push(sum / windowSlice.length);
+  }
+
+  return rollingAverages;
+}
+
 export const useLastGameData = () => {
   const getLastGameData = (): { score: number; round: number }[] | null => {
     try {
@@ -9,8 +31,15 @@ export const useLastGameData = () => {
       const history: boolean[] = JSON.parse(rawData);
 
       if (Array.isArray(history)) {
-        return history.map((value, index) => ({
-          score: value ? 1 : 0,
+        // Convert boolean history to numbers (1 for true, 0 for false)
+        const numericHistory = history.map((result) => (result ? 1 : 0));
+
+        // Calculate the rolling average with a window size of 3
+        const rollingAverages = calculateRollingAverage(numericHistory, 4);
+
+        // Map the averages to the format expected by the chart
+        return rollingAverages.map((avg, index) => ({
+          score: avg,
           round: index + 1,
         }));
       }

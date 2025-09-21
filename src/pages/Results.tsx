@@ -7,7 +7,7 @@ import {
   type ChartConfig,
 } from "../components/Chart";
 import Teaser from "../components/Teaser";
-import { useLastGameData } from "../hooks/useLastGameData"; // Use the new hook
+import { useLastGameData } from "../hooks/useLastGameData";
 import GenericShareButton from "../components/GenericShareButton";
 
 const chartConfig = {
@@ -24,7 +24,9 @@ export default function Results() {
 
   const graphSectionRef = useRef<HTMLElement>(null);
 
-  const renderChart = (data: typeof chartData): React.ReactNode => {
+  const renderChart = (
+    data: ReturnType<typeof getLastGameData>
+  ): React.ReactNode => {
     if (data === null) {
       return (
         <div className="w-full h-60 flex flex-col items-center justify-center [&>*]:text-center p-2">
@@ -43,21 +45,21 @@ export default function Results() {
             data={data}
             margin={{
               left: -28,
-              bottom: -8,
+              bottom: 0,
               right: 12,
+              top: 12,
             }}
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="round"
+              dataKey="round" // Use "round" for the X-axis
               tickLine={false}
               axisLine={false}
               tickMargin={8}
             />
             <YAxis
-              domain={[0, 1]}
-              tickCount={2}
-              tickFormatter={(value) => (value === 1 ? "Correct" : "Incorrect")}
+              domain={[0, 1]} // Domain is perfect for average score
+              tickCount={6}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -78,7 +80,7 @@ export default function Results() {
             </defs>
             <Area
               dataKey="score"
-              type="step"
+              type="natural" // "natural" creates a smooth curve for the average
               fill="url(#fillScore)"
               stroke="black"
             />
@@ -95,9 +97,7 @@ export default function Results() {
         <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center">
           <div>
             <h2 className="font-bold text-lg lg:text-2xl">Longest Streak</h2>
-            <p className="lg:text-lg lg:mt-1">
-              Your best run in the last game.
-            </p>
+            <p>Your best run in the last game.</p>
           </div>
           <div className="ml-auto flex flex-col items-center justify-center">
             <span className="text-4xl lg:text-5xl font-bold mx-4">
@@ -114,7 +114,6 @@ export default function Results() {
         </section>
 
         <section className="flex items-center justify-end w-full max-w-xl lg:max-w-3xl gap-4">
-          {/* Corrected href for HashRouter */}
           <a href="#/">
             <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer">
               <span>
