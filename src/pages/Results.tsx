@@ -1,7 +1,5 @@
-// src/pages/Results.tsx
-
 import { useRef } from "react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"; // 👈 Import YAxis
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -9,7 +7,7 @@ import {
   type ChartConfig,
 } from "../components/Chart";
 import Teaser from "../components/Teaser";
-import { useSaveData } from "../hooks/useSaveData";
+import { useLastGameData } from "../hooks/useLastGameData"; // Use the new hook
 import GenericShareButton from "../components/GenericShareButton";
 
 const chartConfig = {
@@ -20,20 +18,18 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function Results() {
-  const { getData, getStreak } = useSaveData();
-  const chartData = getData();
-  const currentStreak = getStreak();
+  const { getLastGameData, getLongestStreak } = useLastGameData();
+  const chartData = getLastGameData();
+  const longestStreak = getLongestStreak();
 
   const graphSectionRef = useRef<HTMLElement>(null);
 
   const renderChart = (data: typeof chartData): React.ReactNode => {
     if (data === null) {
-      return <p>Sorry, an error occured!</p>;
-    } else if ("itemsLeft" in data) {
       return (
         <div className="w-full h-60 flex flex-col items-center justify-center [&>*]:text-center p-2">
-          <h2 className="font-bold text-lg">Nothing here yet!</h2>
-          <p>Play {data.itemsLeft} more rounds to start seeing statistics.</p>
+          <h2 className="font-bold text-lg">No game data found!</h2>
+          <p>Play a game to see your results.</p>
         </div>
       );
     } else {
@@ -53,15 +49,15 @@ export default function Results() {
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="round"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
             <YAxis
               domain={[0, 1]}
-              tickCount={6}
+              tickCount={2}
+              tickFormatter={(value) => (value === 1 ? "Correct" : "Incorrect")}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -82,7 +78,7 @@ export default function Results() {
             </defs>
             <Area
               dataKey="score"
-              type="natural"
+              type="step"
               fill="url(#fillScore)"
               stroke="black"
             />
@@ -98,14 +94,14 @@ export default function Results() {
       <section className="flex flex-col flex-1 items-center mx-4 justify-center gap-4">
         <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center">
           <div>
-            <h2 className="font-bold text-lg lg:text-2xl">Streak</h2>
+            <h2 className="font-bold text-lg lg:text-2xl">Longest Streak</h2>
             <p className="lg:text-lg lg:mt-1">
-              Continue to play in order to get a higher streak!
+              Your best run in the last game.
             </p>
           </div>
           <div className="ml-auto flex flex-col items-center justify-center">
             <span className="text-4xl lg:text-5xl font-bold mx-4">
-              {currentStreak}
+              {longestStreak}
             </span>
           </div>
         </section>
@@ -118,7 +114,8 @@ export default function Results() {
         </section>
 
         <section className="flex items-center justify-end w-full max-w-xl lg:max-w-3xl gap-4">
-          <a href="#">
+          {/* Corrected href for HashRouter */}
+          <a href="#/">
             <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer">
               <span>
                 <svg

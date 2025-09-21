@@ -7,8 +7,8 @@ import KeyboardKey from "../components/KeyboardKey";
 import { useGeneratePair } from "../hooks/useGeneratePair";
 import { usePosthog } from "../hooks/usePosthog";
 import Teaser from "../components/Teaser";
-import ViewResults from "../components/ViewResults";
 import { useSaveData } from "../hooks/useSaveData";
+import ProgressBar from "../components/ProgressBar";
 
 function Home() {
   const [services, setServices] = useState<Service[]>([]);
@@ -19,9 +19,26 @@ function Home() {
   const [startTime, setStartTime] = useState(Date.now());
   const { saveResult } = useSaveData();
 
+  const [round, setRound] = useState(0);
+  const [gameResults, setGameResults] = useState<boolean[]>([]);
+  const [isRedirecting, setIsRedirecting] = useState(false); // Prevents multiple redirects
+  const TOTAL_ROUNDS = 10;
+
+  // This effect now runs only once on component mount, preventing the loop.
   useEffect(() => {
     setServices(getPair());
-  }, []);
+    setRound(1);
+    setGameResults([]);
+  }, []); // <-- FIX: Empty dependency array ensures this runs only once.
+
+  useEffect(() => {
+    // Navigate only when the round count is exceeded and we aren't already redirecting.
+    if (round > TOTAL_ROUNDS && !isRedirecting) {
+      setIsRedirecting(true); // Set flag to prevent re-triggering
+      localStorage.setItem("lastGame", JSON.stringify(gameResults));
+      window.location.hash = "#/results";
+    }
+  }, [round, gameResults, isRedirecting]);
 
   useEffect(() => {
     setStartTime(Date.now());
@@ -29,25 +46,26 @@ function Home() {
 
   const handleCardClick = useCallback(
     (clickedIndex: number) => {
-      if (isAnimating || selection) return;
+      if (isAnimating || selection || round > TOTAL_ROUNDS) return;
 
       const realService = services.find((s) => s.isReal);
       const fakeService = services.find((s) => !s.isReal);
       const selectedService = services[clickedIndex];
+      const isCorrect = selectedService.isReal;
 
       if (realService && fakeService) {
         captureAttempt({
           real_aws_service: realService.title,
           fake_aws_service: fakeService.title,
           selected_answer: selectedService.title,
-          is_correct: selectedService.isReal,
+          is_correct: isCorrect,
           time_to_answer_ms: Date.now() - startTime,
           question_pair_id: `${realService.title}-${fakeService.title}`,
         });
       }
 
-      saveResult(selectedService.isReal);
-
+      saveResult(isCorrect);
+      setGameResults((prevResults) => [...prevResults, isCorrect]);
       setSelection({ index: clickedIndex });
 
       setTimeout(() => {
@@ -59,11 +77,24 @@ function Home() {
       }, 400);
 
       setTimeout(() => {
-        setServices(getPair());
+        // This will either set up the next round or trigger the navigation effect
+        setRound((prevRound) => prevRound + 1);
+        if (round < TOTAL_ROUNDS) {
+          setServices(getPair());
+        }
         setIsAnimating(false);
       }, 800);
     },
-    [isAnimating, selection, services, getPair, captureAttempt, startTime]
+    [
+      isAnimating,
+      selection,
+      services,
+      getPair,
+      captureAttempt,
+      startTime,
+      saveResult,
+      round,
+    ]
   );
 
   useEffect(() => {
@@ -85,6 +116,18 @@ function Home() {
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
       <Teaser />
+      <ProgressBar
+        current={Math.min(round, TOTAL_ROUNDS)}
+        total={TOTAL_ROUNDS}
+      />
+      <div className="flex items-center justify-center my-4">
+        <span className="font-light text-base">
+          <span className="text-3xl font-semibold text-[#222]">
+            {Math.min(round, TOTAL_ROUNDS)}{" "}
+          </span>
+          of {TOTAL_ROUNDS}
+        </span>
+      </div>
       <section
         className={`flex-1 flex max-lg:flex-col items-center justify-center gap-4 lg:gap-16 transition-all duration-250 ease-in-out
           ${
@@ -94,7 +137,7 @@ function Home() {
           }
         `}
       >
-        {services.length > 0 && (
+        {services.length > 0 && round <= TOTAL_ROUNDS && (
           <>
             <AWSCard
               title={services[0].title}
@@ -147,9 +190,6 @@ function Home() {
             />
           </>
         )}
-      </section>
-      <section className="w-full mb-4">
-        <ViewResults />
       </section>
       <Footer />
     </main>
