@@ -95,7 +95,7 @@ export default function GenericShareButton({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="lucide lucide-share2-icon lucide-share-2 size-5"
+            className="lucide lucide-share2-icon lucide-share-2"
           >
             <circle cx="18" cy="5" r="3" />
             <circle cx="6" cy="12" r="3" />

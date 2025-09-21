@@ -56,14 +56,14 @@ export const useSaveData = () => {
     try {
       const rawData = localStorage.getItem(STORAGE_KEY);
       if (!rawData) {
-        return { itemsLeft: 20 };
+        return { itemsLeft: 5 };
       }
 
       const history: boolean[] = JSON.parse(rawData);
 
       if (
         Array.isArray(history) &&
-        history.length >= 20 &&
+        history.length >= 5 &&
         history.length <= 50
       ) {
         return smoothBooleanData(history).map((value) => {
@@ -71,7 +71,7 @@ export const useSaveData = () => {
         });
       }
 
-      return { itemsLeft: 20 - history.length };
+      return { itemsLeft: 5 - history.length };
     } catch (error) {
       console.error(
         "Failed to retrieve or process boolean data from localStorage:",
