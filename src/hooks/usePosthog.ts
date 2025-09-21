@@ -30,5 +30,9 @@ export function usePosthog() {
     });
   };
 
-  return { captureAttempt };
+  const captureLinkClick = (link_name: string) => {
+    posthog.capture("link_click", { link_name });
+  };
+
+  return { captureAttempt, captureLinkClick };
 }
