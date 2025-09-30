@@ -10,6 +10,7 @@ import Teaser from "../components/Teaser";
 import { useLastGameData } from "../hooks/useLastGameData";
 import GenericShareButton from "../components/GenericShareButton";
 import { useHighScores } from "../hooks/useHighScores";
+import { useTheme } from "../providers/ThemeProvider";
 
 const chartConfig = {
   desktop: {
@@ -24,6 +25,7 @@ export default function Results() {
   const chartData = getLastGameData();
   const longestStreak = getLongestStreak();
   const highScore = getHighScore();
+  const { theme } = useTheme();
 
   const graphSectionRef = useRef<HTMLElement>(null);
 
@@ -57,12 +59,18 @@ export default function Results() {
             <XAxis
               dataKey="round" // Use "round" for the X-axis
               tickLine={false}
+              tick={{
+                stroke: theme === "normal" ? "#666" : "#ddd",
+              }}
               axisLine={false}
               tickMargin={8}
             />
             <YAxis
               domain={[0, 1]} // Domain is perfect for average score
               tickCount={6}
+              tick={{
+                stroke: theme === "normal" ? "#666" : "#ddd",
+              }}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
@@ -70,22 +78,33 @@ export default function Results() {
             <ChartTooltip
               cursor={false}
               wrapperStyle={{
-                backgroundColor: "#f3f3f7",
+                backgroundColor: theme === "normal" ? "#f3f3f7" : "#2a2a36",
                 borderRadius: "8px",
               }}
-              content={<ChartTooltipContent className="border-black/10" />}
+              content={
+                <ChartTooltipContent className="border-black/10 dark:border-white/10" />
+              }
             />
             <defs>
               <linearGradient id="fillScore" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="black" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="black" stopOpacity={0.15} />
+                {theme === "normal" ? (
+                  <>
+                    <stop offset="5%" stopColor="black" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="black" stopOpacity={0.15} />
+                  </>
+                ) : (
+                  <>
+                    <stop offset="5%" stopColor="white" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="white" stopOpacity={0.15} />
+                  </>
+                )}
               </linearGradient>
             </defs>
             <Area
               dataKey="score"
               type="natural" // "natural" creates a smooth curve for the average
               fill="url(#fillScore)"
-              stroke="black"
+              stroke={theme === "normal" ? "black" : "white"}
             />
           </AreaChart>
         </ChartContainer>
@@ -94,10 +113,10 @@ export default function Results() {
   };
 
   return (
-    <main className="h-svh flex flex-col font-aws">
+    <main className="h-svh flex flex-col font-aws bg-white dark:bg-[#1a1a24]">
       <Teaser />
       <section className="flex flex-col flex-1 items-center mx-4 justify-center gap-4">
-        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center">
+        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center dark:bg-[#2a2a36] dark:text-white">
           <div>
             <h2 className="font-bold text-lg lg:text-2xl">Longest Streak</h2>
             <p>Your best run in the last game.</p>
@@ -109,7 +128,7 @@ export default function Results() {
           </div>
         </section>
 
-        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center">
+        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center dark:bg-[#2a2a36] dark:text-white">
           <div>
             <h2 className="font-bold text-lg lg:text-2xl">High Score</h2>
             <p>Your best score across all games.</p>
@@ -123,14 +142,14 @@ export default function Results() {
 
         <section
           ref={graphSectionRef}
-          className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl pt-8 pb-4 px-5 rounded-xl flex items-center"
+          className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl pt-8 pb-4 px-5 rounded-xl flex items-center dark:bg-[#2a2a36] dark:text-white"
         >
           {renderChart(chartData)}
         </section>
 
         <section className="flex items-center justify-end w-full max-w-xl lg:max-w-3xl gap-4">
           <a href="#/">
-            <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer">
+            <button className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 cursor-pointer dark:bg-[#2a2a36] dark:text-white">
               <span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

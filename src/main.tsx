@@ -7,6 +7,7 @@ import { HashRouter, Route, Routes } from "react-router";
 import "./globals.css";
 import type { PostHogConfig } from "posthog-js";
 import Results from "./pages/Results.tsx";
+import { ThemeProvider } from "./providers/ThemeProvider.tsx";
 
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -21,12 +22,14 @@ createRoot(document.getElementById("root")!).render(
       apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
       options={options}
     >
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/results" element={<Results />} />
-        </Routes>
-      </HashRouter>
+      <ThemeProvider storageKey="gameMode">
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/results" element={<Results />} />
+          </Routes>
+        </HashRouter>
+      </ThemeProvider>
     </PostHogProvider>
   </StrictMode>
 );

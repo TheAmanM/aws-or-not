@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @font-face {
   font-family: "AWS";
   src: url("./assets/fonts/AmazonEmberDisplay_Lt.ttf");

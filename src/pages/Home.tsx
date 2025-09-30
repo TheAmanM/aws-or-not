@@ -10,6 +10,7 @@ import Teaser from "../components/Teaser";
 import { useSaveData } from "../hooks/useSaveData";
 import ProgressBar from "../components/ProgressBar";
 import { useHighScores } from "../hooks/useHighScores";
+import { useTheme } from "../providers/ThemeProvider";
 
 function Home() {
   const [services, setServices] = useState<Service[]>([]);
@@ -28,9 +29,11 @@ function Home() {
     const savedMode = localStorage.getItem("gameMode");
     return (savedMode as "normal" | "endless") || "normal";
   });
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     localStorage.setItem("gameMode", gameMode);
+    setTheme(gameMode);
   }, [gameMode]);
   const TOTAL_ROUNDS = 10;
 
@@ -152,7 +155,7 @@ function Home() {
   }, [handleCardClick]);
 
   return (
-    <main className="flex flex-col h-svh w-svw overflow-hidden">
+    <main className="flex flex-col h-svh w-svw overflow-hidden bg-white dark:bg-[#1a1a24]">
       <Teaser />
       {gameMode === "normal" ? (
         <ProgressBar
@@ -163,20 +166,13 @@ function Home() {
         <div className="h-2" /> // Keep spacing consistent
       )}
       <div className="flex items-center justify-center my-4">
-        <span className="font-light text-base">
-          {gameMode === "normal" ? (
+        <span className="font-light text-base dark:text-white">
+          {gameMode === "normal" && (
             <>
-              <span className="text-3xl font-semibold text-[#222]">
+              <span className="text-3xl font-semibold text-[#222] dark:text-[#ddd]">
                 {Math.min(round, TOTAL_ROUNDS)}{" "}
               </span>
               of {TOTAL_ROUNDS}
-            </>
-          ) : (
-            <>
-              Score:{" "}
-              <span className="text-3xl font-semibold text-[#222]">
-                {gameResults.filter(Boolean).length}
-              </span>
             </>
           )}
         </span>
@@ -206,7 +202,7 @@ function Home() {
                     <img
                       src={arrowRight}
                       alt="Press A or Left Arrow"
-                      className="size-4 rotate-180"
+                      className="size-4 rotate-180 dark:invert"
                     />
                   </KeyboardKey>
                   <p className="text-xs text-[#0006]">/</p>
@@ -231,7 +227,7 @@ function Home() {
                     <img
                       src={arrowRight}
                       alt="Press A or Left Arrow"
-                      className="size-4"
+                      className="size-4 rotate-180 dark:invert"
                     />
                   </KeyboardKey>
                   <p className="text-xs text-[#0006]">/</p>
@@ -247,7 +243,7 @@ function Home() {
       <section className="flex items-center justify-center py-2 lg:py-3">
         <button
           onClick={handleModeToggle}
-          className="bg-[#f3f3f7] py-2.5 px-3 rounded-lg flex items-center gap-2 cursor-pointer"
+          className="bg-[#f3f3f7] py-2.5 px-3 rounded-lg flex items-center gap-2 cursor-pointer dark:bg-[#2a2a36] dark:text-white"
         >
           <p className="font-normal">
             Switch to {gameMode === "normal" ? "Endless" : "Normal"} Mode

@@ -82,7 +82,7 @@ export default function GenericShareButton({
     <>
       <button
         onClick={handleShare}
-        className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2"
+        className="bg-[#f3f3f7] p-2.5 rounded-lg flex items-center gap-2 dark:bg-[#2a2a36] dark:text-white"
       >
         <span>
           <svg
