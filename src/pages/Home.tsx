@@ -9,6 +9,7 @@ import { usePosthog } from "../hooks/usePosthog";
 import Teaser from "../components/Teaser";
 import { useSaveData } from "../hooks/useSaveData";
 import ProgressBar from "../components/ProgressBar";
+import { useHighScores } from "../hooks/useHighScores";
 
 function Home() {
   const [services, setServices] = useState<Service[]>([]);
@@ -18,6 +19,7 @@ function Home() {
   const { captureAttempt } = usePosthog();
   const [startTime, setStartTime] = useState(Date.now());
   const { saveResult } = useSaveData();
+  const { saveHighScore } = useHighScores();
 
   const [round, setRound] = useState(0);
   const [gameResults, setGameResults] = useState<boolean[]>([]);
@@ -35,10 +37,14 @@ function Home() {
     // Navigate only when the round count is exceeded and we aren't already redirecting.
     if (round > TOTAL_ROUNDS && !isRedirecting) {
       setIsRedirecting(true); // Set flag to prevent re-triggering
+
+      const score = gameResults.filter(Boolean).length;
+      saveHighScore(score);
+
       localStorage.setItem("lastGame", JSON.stringify(gameResults));
       window.location.hash = "#/results";
     }
-  }, [round, gameResults, isRedirecting]);
+  }, [round, gameResults, isRedirecting, saveHighScore]);
 
   useEffect(() => {
     setStartTime(Date.now());

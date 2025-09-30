@@ -9,6 +9,7 @@ import {
 import Teaser from "../components/Teaser";
 import { useLastGameData } from "../hooks/useLastGameData";
 import GenericShareButton from "../components/GenericShareButton";
+import { useHighScores } from "../hooks/useHighScores";
 
 const chartConfig = {
   desktop: {
@@ -19,8 +20,10 @@ const chartConfig = {
 
 export default function Results() {
   const { getLastGameData, getLongestStreak } = useLastGameData();
+  const { getHighScore } = useHighScores();
   const chartData = getLastGameData();
   const longestStreak = getLongestStreak();
+  const highScore = getHighScore();
 
   const graphSectionRef = useRef<HTMLElement>(null);
 
@@ -102,6 +105,18 @@ export default function Results() {
           <div className="ml-auto flex flex-col items-center justify-center">
             <span className="text-4xl lg:text-5xl font-bold mx-4">
               {longestStreak}
+            </span>
+          </div>
+        </section>
+
+        <section className="bg-[#f3f3f7] mx-4 w-full max-w-xl lg:max-w-3xl py-4 px-5 rounded-xl flex items-center">
+          <div>
+            <h2 className="font-bold text-lg lg:text-2xl">High Score</h2>
+            <p>Your best score across all games.</p>
+          </div>
+          <div className="ml-auto flex flex-col items-center justify-center">
+            <span className="text-4xl lg:text-5xl font-bold mx-4">
+              {highScore !== null ? highScore : 0}
             </span>
           </div>
         </section>
