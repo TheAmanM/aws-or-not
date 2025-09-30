@@ -23,28 +23,49 @@ function Home() {
 
   const [round, setRound] = useState(0);
   const [gameResults, setGameResults] = useState<boolean[]>([]);
-  const [isRedirecting, setIsRedirecting] = useState(false); // Prevents multiple redirects
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [gameMode, setGameMode] = useState<"normal" | "endless">(() => {
+    const savedMode = localStorage.getItem("gameMode");
+    return (savedMode as "normal" | "endless") || "normal";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("gameMode", gameMode);
+  }, [gameMode]);
   const TOTAL_ROUNDS = 10;
 
-  // This effect now runs only once on component mount, preventing the loop.
+  const handleModeToggle = () => {
+    setGameMode((prev) => (prev === "normal" ? "endless" : "normal"));
+    // Reset game state when mode changes
+    setServices(getPair());
+    setRound(1);
+    setGameResults([]);
+    setIsRedirecting(false);
+  };
+
+  // This effect now runs only once on component mount.
   useEffect(() => {
     setServices(getPair());
     setRound(1);
     setGameResults([]);
-  }, []); // <-- FIX: Empty dependency array ensures this runs only once.
+  }, []); // <-- Empty dependency array is crucial to prevent loops.
+
+  const endGame = useCallback(() => {
+    if (isRedirecting) return;
+
+    const score = gameResults.filter(Boolean).length;
+    saveHighScore(score);
+
+    localStorage.setItem("lastGame", JSON.stringify(gameResults));
+    setIsRedirecting(true);
+    window.location.hash = "#/results";
+  }, [gameResults, saveHighScore, isRedirecting]);
 
   useEffect(() => {
-    // Navigate only when the round count is exceeded and we aren't already redirecting.
-    if (round > TOTAL_ROUNDS && !isRedirecting) {
-      setIsRedirecting(true); // Set flag to prevent re-triggering
-
-      const score = gameResults.filter(Boolean).length;
-      saveHighScore(score);
-
-      localStorage.setItem("lastGame", JSON.stringify(gameResults));
-      window.location.hash = "#/results";
+    if (gameMode === "normal" && round > TOTAL_ROUNDS) {
+      endGame();
     }
-  }, [round, gameResults, isRedirecting, saveHighScore]);
+  }, [round, gameMode, endGame]);
 
   useEffect(() => {
     setStartTime(Date.now());
@@ -52,7 +73,8 @@ function Home() {
 
   const handleCardClick = useCallback(
     (clickedIndex: number) => {
-      if (isAnimating || selection || round > TOTAL_ROUNDS) return;
+      if (isAnimating || selection) return;
+      if (gameMode === "normal" && round > TOTAL_ROUNDS) return;
 
       const realService = services.find((s) => s.isReal);
       const fakeService = services.find((s) => !s.isReal);
@@ -74,6 +96,13 @@ function Home() {
       setGameResults((prevResults) => [...prevResults, isCorrect]);
       setSelection({ index: clickedIndex });
 
+      if (gameMode === "endless" && !isCorrect) {
+        setTimeout(() => {
+          endGame();
+        }, 800);
+        return;
+      }
+
       setTimeout(() => {
         setSelection(null);
       }, 450);
@@ -83,9 +112,10 @@ function Home() {
       }, 400);
 
       setTimeout(() => {
-        // This will either set up the next round or trigger the navigation effect
         setRound((prevRound) => prevRound + 1);
-        if (round < TOTAL_ROUNDS) {
+        if (gameMode === "normal" && round >= TOTAL_ROUNDS) {
+          // In normal mode, let the useEffect handle the end
+        } else {
           setServices(getPair());
         }
         setIsAnimating(false);
@@ -100,6 +130,8 @@ function Home() {
       startTime,
       saveResult,
       round,
+      gameMode,
+      endGame,
     ]
   );
 
@@ -122,16 +154,31 @@ function Home() {
   return (
     <main className="flex flex-col h-svh w-svw overflow-hidden">
       <Teaser />
-      <ProgressBar
-        current={Math.min(round, TOTAL_ROUNDS)}
-        total={TOTAL_ROUNDS}
-      />
+      {gameMode === "normal" ? (
+        <ProgressBar
+          current={Math.min(round, TOTAL_ROUNDS)}
+          total={TOTAL_ROUNDS}
+        />
+      ) : (
+        <div className="h-2" /> // Keep spacing consistent
+      )}
       <div className="flex items-center justify-center my-4">
         <span className="font-light text-base">
-          <span className="text-3xl font-semibold text-[#222]">
-            {Math.min(round, TOTAL_ROUNDS)}{" "}
-          </span>
-          of {TOTAL_ROUNDS}
+          {gameMode === "normal" ? (
+            <>
+              <span className="text-3xl font-semibold text-[#222]">
+                {Math.min(round, TOTAL_ROUNDS)}{" "}
+              </span>
+              of {TOTAL_ROUNDS}
+            </>
+          ) : (
+            <>
+              Score:{" "}
+              <span className="text-3xl font-semibold text-[#222]">
+                {gameResults.filter(Boolean).length}
+              </span>
+            </>
+          )}
         </span>
       </div>
       <section
@@ -143,7 +190,7 @@ function Home() {
           }
         `}
       >
-        {services.length > 0 && round <= TOTAL_ROUNDS && (
+        {services.length > 0 && (
           <>
             <AWSCard
               title={services[0].title}
@@ -196,6 +243,16 @@ function Home() {
             />
           </>
         )}
+      </section>
+      <section className="flex items-center justify-center py-2 lg:py-3">
+        <button
+          onClick={handleModeToggle}
+          className="bg-[#f3f3f7] py-2.5 px-3 rounded-lg flex items-center gap-2 cursor-pointer"
+        >
+          <p className="font-normal">
+            Switch to {gameMode === "normal" ? "Endless" : "Normal"} Mode
+          </p>
+        </button>
       </section>
       <Footer />
     </main>
